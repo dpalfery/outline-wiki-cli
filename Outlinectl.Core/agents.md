@@ -14,9 +14,9 @@ Outlinectl.Core is the foundation layer containing domain models, DTOs, and serv
 ## Key Principles
 
 ### Dependency Direction
-- Other projects depend on Core
+- Other projects depend on Core (Api, Storage, Cli, Tests → Core)
 - Core depends on nothing (except .NET runtime)
-- Never add references to other projects in this solution
+- Core should never reference other projects in this solution
 
 ### Service Interfaces
 - Define service interfaces in `Services/` directory
