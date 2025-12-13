@@ -46,13 +46,14 @@ public class OutlineApiClient : IOutlineApiClient
         return result ?? new StandardListResponse<CollectionDto>();
     }
 
-    public async Task<StandardListResponse<SearchResultDto>> SearchDocumentsAsync(string query, string? collectionId = null, int limit = 10, int offset = 0)
+    public async Task<StandardListResponse<SearchResultDto>> SearchDocumentsAsync(string query, string? collectionId = null, string? parentDocumentId = null, int limit = 10, int offset = 0)
     {
          await EnsureBaseUrlAsync();
          var payload = new 
          { 
              query, 
              collectionId, 
+             parentDocumentId,
              limit, 
              offset 
          };

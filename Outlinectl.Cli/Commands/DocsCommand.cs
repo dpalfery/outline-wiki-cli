@@ -14,6 +14,7 @@ public class DocsCommand : Command
     public DocsCommand() : base("docs", "Manage documents")
     {
         AddCommand(CreateSearchCommand());
+        AddCommand(CreateListCommand());
         AddCommand(CreateGetCommand());
         AddCommand(CreateCreateCommand());
         AddCommand(CreateUpdateCommand());
@@ -25,12 +26,14 @@ public class DocsCommand : Command
         var command = new Command("search", "Search for documents.");
         var queryOption = new Option<string>("--query", "Search query terms.") { IsRequired = true };
         var collectionOption = new Option<string>("--collection-id", "Filter by collection ID.");
+        var parentOption = new Option<string>("--parent-id", "Filter by parent document ID.");
         var limitOption = new Option<int>("--limit", () => 10, "Max results.");
         var offsetOption = new Option<int>("--offset", () => 0, "Pagination offset.");
         var archivedOption = new Option<bool>("--include-archived", "Include archived documents.");
 
         command.AddOption(queryOption);
         command.AddOption(collectionOption);
+        command.AddOption(parentOption);
         command.AddOption(limitOption);
         command.AddOption(offsetOption);
         command.AddOption(archivedOption);
@@ -43,13 +46,14 @@ public class DocsCommand : Command
 
             var query = context.ParseResult.GetValueForOption(queryOption)!;
             var collectionId = context.ParseResult.GetValueForOption(collectionOption);
+            var parentId = context.ParseResult.GetValueForOption(parentOption);
             var limit = context.ParseResult.GetValueForOption(limitOption);
             var offset = context.ParseResult.GetValueForOption(offsetOption);
             var archived = context.ParseResult.GetValueForOption(archivedOption);
 
             try
             {
-                var response = await docService.SearchDocumentsAsync(query, collectionId, limit, offset, archived);
+                var response = await docService.SearchDocumentsAsync(query, collectionId, parentId, limit, offset, archived);
                 formatter.WriteOutput(response.Data, "docs.search", new Core.Common.MetaData
                 {
                     Pagination = new Core.Common.PaginationMeta
@@ -62,6 +66,52 @@ public class DocsCommand : Command
             catch (Exception ex)
             {
                 formatter.WriteError(new Core.Common.ApiError { Message = ex.Message }, "docs.search", 10);
+                context.ExitCode = 10;
+            }
+        });
+
+        return command;
+    }
+
+    private Command CreateListCommand()
+    {
+        var command = new Command("list", "List documents.");
+        var collectionOption = new Option<string>("--collection-id", "Filter by collection ID.");
+        var parentOption = new Option<string>("--parent-id", "Filter by parent document ID.");
+        var limitOption = new Option<int>("--limit", () => 25, "Max results.");
+        var offsetOption = new Option<int>("--offset", () => 0, "Pagination offset.");
+
+        command.AddOption(collectionOption);
+        command.AddOption(parentOption);
+        command.AddOption(limitOption);
+        command.AddOption(offsetOption);
+
+        command.SetHandler(async (InvocationContext context) =>
+        {
+            var host = context.GetHost();
+            var docService = host.Services.GetRequiredService<IDocumentService>();
+            var formatter = host.Services.GetRequiredService<IOutputFormatter>();
+
+            var collectionId = context.ParseResult.GetValueForOption(collectionOption);
+            var parentId = context.ParseResult.GetValueForOption(parentOption);
+            var limit = context.ParseResult.GetValueForOption(limitOption);
+            var offset = context.ParseResult.GetValueForOption(offsetOption);
+
+            try
+            {
+                var response = await docService.ListDocumentsAsync(collectionId, parentId, limit, offset);
+                formatter.WriteOutput(response.Data, "docs.list", new Core.Common.MetaData
+                {
+                    Pagination = new Core.Common.PaginationMeta
+                    {
+                        Limit = response.Pagination?.Limit ?? limit,
+                        Offset = response.Pagination?.Offset ?? offset
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                formatter.WriteError(new Core.Common.ApiError { Message = ex.Message }, "docs.list", 10);
                 context.ExitCode = 10;
             }
         });

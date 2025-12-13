@@ -21,8 +21,8 @@ public class AuthCommand : Command
     private Command CreateLoginCommand()
     {
         var command = new Command("login", "Authenticate with an Outline instance.");
-        var baseUrlOption = new Option<string>("--base-url", "The URL of your Outline instance (e.g. https://docs.example.com).") { IsRequired = true };
-        var tokenOption = new Option<string>("--token", "The API token (can also be passed via stdin or OUTLINE_API_TOKEN).");
+        var baseUrlOption = new Option<string>("--base-url", "The URL of your Outline instance (e.g. https://docs.example.com). If omitted, OUTLINE_BASE_URL is used.");
+        var tokenOption = new Option<string>("--token", "The API token (can also be passed via stdin or OUTLINE_API_TOKEN). Explicit --token overrides OUTLINE_API_TOKEN.");
         var tokenStdinOption = new Option<bool>("--token-stdin", "Read token from stdin.");
         var profileOption = new Option<string>("--profile", () => "default", "Configuration profile name.");
 
@@ -37,10 +37,13 @@ public class AuthCommand : Command
             var authService = host.Services.GetRequiredService<IAuthService>();
             var formatter = host.Services.GetRequiredService<IOutputFormatter>();
 
-            var baseUrl = context.ParseResult.GetValueForOption(baseUrlOption)!;
+            var baseUrl = context.ParseResult.GetValueForOption(baseUrlOption);
             var token = context.ParseResult.GetValueForOption(tokenOption);
             var useStdin = context.ParseResult.GetValueForOption(tokenStdinOption);
             var profile = context.ParseResult.GetValueForOption(profileOption)!;
+
+            // Env fallback (explicit CLI args always win)
+            baseUrl ??= Environment.GetEnvironmentVariable("OUTLINE_BASE_URL");
 
             if (useStdin)
             {
@@ -49,10 +52,27 @@ public class AuthCommand : Command
                 token = await reader.ReadToEndAsync();
                 token = token.Trim();
             }
+            else if (string.IsNullOrWhiteSpace(token))
+            {
+                token = Environment.GetEnvironmentVariable("OUTLINE_API_TOKEN");
+            }
+
+            baseUrl = baseUrl?.Trim();
+            if (!string.IsNullOrEmpty(baseUrl))
+            {
+                baseUrl = baseUrl.TrimEnd('/');
+            }
+
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                formatter.WriteError(new ApiError { Message = "Base URL is required via --base-url or OUTLINE_BASE_URL." }, "auth.login", 2);
+                context.ExitCode = 2;
+                return;
+            }
 
             if (string.IsNullOrWhiteSpace(token))
             {
-                formatter.WriteError(new ApiError { Message = "Token is required via --token, --token-stdin." }, "auth.login", 2);
+                formatter.WriteError(new ApiError { Message = "Token is required via --token, --token-stdin, or OUTLINE_API_TOKEN." }, "auth.login", 2);
                 context.ExitCode = 2;
                 return;
             }
