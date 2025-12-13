@@ -15,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 jobs:
   publish:
@@ -34,6 +35,9 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Update npm (required for trusted publishing)
+        run: npm install -g npm@latest
 
       - name: Verify tag matches package.json version
         working-directory: npm/outlinectl
@@ -79,5 +83,3 @@ jobs:
       - name: Publish to npm
         working-directory: npm/outlinectl
         run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

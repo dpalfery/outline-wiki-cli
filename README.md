@@ -54,7 +54,7 @@ This requires Node.js on the target machine and a GitHub Release for the matchin
 
 Tip: This repo includes a GitHub Actions workflow that builds and uploads these assets automatically when you push a tag like `v0.1.0`.
 
-To publish the npm wrapper package automatically on tag push, add a repository secret named `NPM_TOKEN` (an npm access token with publish rights for `@dpalfery/outlinectl`) and use the workflow in `.github/workflows/publish-npm.yml`.
+Recommended: use npm Trusted Publishing (OIDC) so you don't need long-lived publish tokens or 2FA-bypass tokens in CI. Configure a trusted publisher for this repo/workflow on npmjs.com, then use `.github/workflows/publish-npm.yml`.
 
 The npm package looks for assets at:
 
