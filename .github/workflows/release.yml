@@ -22,10 +22,10 @@ jobs:
             runsOn: ubuntu-latest
             asset: outlinectl-linux-x64
           - rid: osx-x64
-            runsOn: macos-13
+            runsOn: macos-15-intel
             asset: outlinectl-osx-x64
           - rid: osx-arm64
-            runsOn: macos-14
+            runsOn: macos-latest
             asset: outlinectl-osx-arm64
 
     runs-on: ${{ matrix.runsOn }}
