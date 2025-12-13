@@ -304,6 +304,10 @@ node_modules/
 # npm pack artifacts
 *.tgz
 
+# Keep npm wrapper executable script (overrides the global **/bin/* ignore)
+!npm/outlinectl/bin/
+!npm/outlinectl/bin/**
+
 # Visual Studio 6 build log
 *.plg
 
