@@ -1,6 +1,6 @@
 {
-  "name": "@outline-cli/outlinectl",
-  "version": "0.1.0",
+  "name": "@dpalfery/outlinectl",
+  "version": "0.1.1",
   "description": "Outlinectl: CLI for Outline Wiki (npm wrapper around native binaries)",
   "license": "MIT",
   "repository": {

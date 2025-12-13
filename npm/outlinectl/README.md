@@ -5,7 +5,7 @@ This is an npm wrapper that installs a prebuilt `outlinectl` native binary from 
 ## Install
 
 ```bash
-npm i -g @outline-cli/outlinectl
+npm i -g @dpalfery/outlinectl
 ```
 
 After install, run:

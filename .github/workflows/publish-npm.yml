@@ -59,9 +59,11 @@ jobs:
           VERSION_FROM_TAG="${TAG#v}"
           PKG_VERSION=$(node -p "require('./package.json').version")
 
+          PKG_NAME=$(node -p "require('./package.json').name")
+
           echo "Tag: ${TAG}"
           echo "Tag version: ${VERSION_FROM_TAG}"
-          echo "package.json version: ${PKG_VERSION}"
+          echo "package.json: ${PKG_NAME}@${PKG_VERSION}"
 
           if [ "${VERSION_FROM_TAG}" != "${PKG_VERSION}" ]; then
             echo "ERROR: Tag version does not match npm/outlinectl/package.json version." >&2
