@@ -117,6 +117,27 @@ Configuration is stored in your application data folder:
 - Windows: `%APPDATA%\outlinectl\config.json`
 - Linux/macOS: `~/.config/outlinectl/config.json`
 
+### Environment variables
+
+- `OUTLINE_API_TOKEN`: Outline API token.
+	- Used as a global override (if set, it is used instead of any stored token).
+	- Useful for CI/CD: set the env var and run commands without writing secrets to disk.
+- `OUTLINE_BASE_URL`: Outline instance base URL (e.g. `https://docs.example.com`).
+	- Currently used as a fallback for `outlinectl auth login` when `--base-url` is omitted.
+
+### Auth options
+
+`outlinectl auth login` supports these options:
+
+- `--base-url <url>`: Outline base URL (falls back to `OUTLINE_BASE_URL`).
+- `--token <token>`: API token (overrides `OUTLINE_API_TOKEN`).
+- `--token-stdin`: read the token from stdin (recommended to avoid shell history).
+- `--profile <name>`: profile name (default: `default`). Login sets the current profile.
+
+Tokens are stored separately from config:
+- Windows: `%APPDATA%\outlinectl\secrets.json`
+- Linux/macOS: `~/.config/outlinectl/secrets.json`
+
 ## Development
 
 See individual project readme files for more details:
