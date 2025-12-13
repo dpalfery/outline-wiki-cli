@@ -1,0 +1,108 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build (${{ matrix.rid }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - rid: win-x64
+            runsOn: windows-latest
+            asset: outlinectl-win-x64.exe
+          - rid: linux-x64
+            runsOn: ubuntu-latest
+            asset: outlinectl-linux-x64
+          - rid: osx-x64
+            runsOn: macos-13
+            asset: outlinectl-osx-x64
+          - rid: osx-arm64
+            runsOn: macos-14
+            asset: outlinectl-osx-arm64
+
+    runs-on: ${{ matrix.runsOn }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Publish
+        run: >-
+          dotnet publish Outlinectl.Cli/Outlinectl.Cli.csproj
+          -c Release
+          -r ${{ matrix.rid }}
+          --self-contained true
+          /p:PublishSingleFile=true
+          /p:PublishReadyToRun=true
+          -o artifacts/${{ matrix.rid }}
+
+      - name: Prepare asset (Windows)
+        if: startsWith(matrix.rid, 'win-')
+        shell: pwsh
+        run: |
+          $src = Join-Path "${{ github.workspace }}" "artifacts/${{ matrix.rid }}/Outlinectl.Cli.exe"
+          if (-not (Test-Path $src)) {
+            throw "Expected publish output not found: $src"
+          }
+          Copy-Item -Force $src "artifacts/${{ matrix.rid }}/${{ matrix.asset }}"
+
+      - name: Prepare asset (Linux/macOS)
+        if: ${{ !startsWith(matrix.rid, 'win-') }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC="artifacts/${{ matrix.rid }}/Outlinectl.Cli"
+          if [ ! -f "$SRC" ]; then
+            echo "Expected publish output not found: $SRC" >&2
+            ls -la "artifacts/${{ matrix.rid }}" || true
+            exit 1
+          fi
+          cp "$SRC" "artifacts/${{ matrix.rid }}/${{ matrix.asset }}"
+          chmod +x "artifacts/${{ matrix.rid }}/${{ matrix.asset }}"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: artifacts/${{ matrix.rid }}/${{ matrix.asset }}
+          if-no-files-found: error
+
+  release:
+    name: create release
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: List dist
+        run: ls -R dist
+
+      - name: Create GitHub Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/**/outlinectl-*
+            dist/**/outlinectl-*.exe
+          generate_release_notes: true
+          draft: false
+          prerelease: false

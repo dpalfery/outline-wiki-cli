@@ -35,6 +35,43 @@ cd Outlinectl.Cli
 dotnet run
 ```
 
+## Installing
+
+### npm (global install)
+
+If you want an install experience like `npm i -g ...`, this repo includes an npm wrapper package that downloads a prebuilt `outlinectl` binary from GitHub Releases.
+
+```bash
+npm i -g @outline-cli/outlinectl
+```
+
+This requires Node.js on the target machine and a GitHub Release for the matching version that includes these assets:
+
+- `outlinectl-win-x64.exe`
+- `outlinectl-linux-x64`
+- `outlinectl-osx-x64`
+- `outlinectl-osx-arm64`
+
+Tip: This repo includes a GitHub Actions workflow that builds and uploads these assets automatically when you push a tag like `v0.1.0`.
+
+To publish the npm wrapper package automatically on tag push, add a repository secret named `NPM_TOKEN` (an npm access token with publish rights for `@outline-cli/outlinectl`) and use the workflow in `.github/workflows/publish-npm.yml`.
+
+The npm package looks for assets at:
+
+`https://github.com/dpalfery/outline-wiki-cli/releases/download/v<version>/<asset>`
+
+You can override the download location for private mirrors with `OUTLINECTL_DOWNLOAD_BASE` or `OUTLINECTL_TAG` (see [npm/outlinectl/README.md](npm/outlinectl/README.md)).
+
+### Direct binary (no Node required)
+
+To deploy to machines without Node.js, publish a self-contained single-file binary and copy it to the target machine.
+
+Example (Windows x64):
+
+```bash
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+```
+
 ## Usage
 
 ### Authentication

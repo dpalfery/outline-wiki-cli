@@ -1,0 +1,29 @@
+{
+  "name": "@outline-cli/outlinectl",
+  "version": "0.1.0",
+  "description": "Outlinectl: CLI for Outline Wiki (npm wrapper around native binaries)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dpalfery/outline-wiki-cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dpalfery/outline-wiki-cli/issues"
+  },
+  "homepage": "https://github.com/dpalfery/outline-wiki-cli#readme",
+  "bin": {
+    "outlinectl": "bin/outlinectl.js"
+  },
+  "files": [
+    "bin/",
+    "scripts/",
+    "vendor/",
+    "README.md"
+  ],
+  "scripts": {
+    "postinstall": "node scripts/postinstall.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
