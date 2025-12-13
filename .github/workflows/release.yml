@@ -102,7 +102,6 @@ jobs:
         with:
           files: |
             dist/**/outlinectl-*
-            dist/**/outlinectl-*.exe
           generate_release_notes: true
           draft: false
           prerelease: false
