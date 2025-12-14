@@ -305,8 +305,8 @@ node_modules/
 *.tgz
 
 # Keep npm wrapper executable script (overrides the global **/bin/* ignore)
-!npm/outlinectl/bin/
-!npm/outlinectl/bin/**
+!7-Deployment/npm/outlinectl/bin/
+!7-Deployment/npm/outlinectl/bin/**
 
 # Visual Studio 6 build log
 *.plg

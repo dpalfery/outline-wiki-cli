@@ -284,6 +284,7 @@ dotnet run
 
 ## Important Considerations
 
+- **Environment**: This project runs on Windows with PowerShell 5.1. DO NOT use the `&&` operator in CLI commands. Use `;` or separate `Execute` tool calls instead.
 - **Security**: Never log or expose API tokens in plain text
 - **Cross-platform**: Ensure file paths work on Windows, Linux, and macOS
 - **Backwards Compatibility**: Configuration format changes need migration support
