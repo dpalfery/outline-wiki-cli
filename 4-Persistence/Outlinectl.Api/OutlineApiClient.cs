@@ -26,13 +26,15 @@ public class OutlineApiClient : IOutlineApiClient
         var profileName = await _authService.GetCurrentProfileNameAsync();
         var profile = await _authService.GetProfileAsync(profileName);
         
-        if (profile != null && !string.IsNullOrEmpty(profile.BaseUrl))
+        if (profile == null || string.IsNullOrWhiteSpace(profile.BaseUrl))
         {
-            var baseUri = new Uri(profile.BaseUrl);
-            if (_httpClient.BaseAddress != baseUri)
-            {
-                _httpClient.BaseAddress = baseUri;
-            }
+            throw new InvalidOperationException("No Outline base URL configured. Run `outlinectl auth login` to set a profile.");
+        }
+
+        var baseUri = new Uri(profile.BaseUrl);
+        if (_httpClient.BaseAddress != baseUri)
+        {
+            _httpClient.BaseAddress = baseUri;
         }
     }
 
@@ -137,7 +139,7 @@ public class OutlineApiClient : IOutlineApiClient
         return result ?? new StandardListResponse<CollectionDto>();
     }
 
-    public async Task<StandardListResponse<SearchResultDto>> SearchDocumentsAsync(string query, string? collectionId = null, string? parentDocumentId = null, int limit = 10, int offset = 0)
+    public async Task<StandardListResponse<SearchResultDto>> SearchDocumentsAsync(string query, string? collectionId = null, string? parentDocumentId = null, int limit = 10, int offset = 0, bool includeArchived = false)
     {
          await EnsureBaseUrlAsync();
          var payload = new 
@@ -146,7 +148,8 @@ public class OutlineApiClient : IOutlineApiClient
              collectionId, 
              parentDocumentId,
              limit, 
-             offset 
+             offset,
+             includeArchived 
          };
          
          var response = await _httpClient.PostAsJsonAsync("api/documents.search", payload);

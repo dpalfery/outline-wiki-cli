@@ -143,8 +143,8 @@ public class DocsCommand : Command
 
                 if (fmt?.ToLower() == "markdown" && !formatter.IsJson)
                 {
-                    // Direct Output for markdown (no JSON envelope if text mode)
-                    Console.WriteLine(doc.Text ?? "");
+                    formatter.SetFormat(OutputFormat.Markdown);
+                    formatter.WriteOutput(doc.Text ?? string.Empty, "docs.get");
                 }
                 else
                 {

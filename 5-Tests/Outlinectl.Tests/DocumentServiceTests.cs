@@ -24,15 +24,15 @@ public class DocumentServiceTests
         // Arrange
         var expectedResponse = new StandardListResponse<SearchResultDto> { Data = new List<SearchResultDto>() };
         _mockApiClient
-            .Setup(x => x.SearchDocumentsAsync("query", "col1", null, 20, 5))
+            .Setup(x => x.SearchDocumentsAsync("query", "col1", null, 20, 5, true))
             .ReturnsAsync(expectedResponse);
 
         // Act
-        var result = await _service.SearchDocumentsAsync("query", "col1", null, 20, 5, false);
+        var result = await _service.SearchDocumentsAsync("query", "col1", null, 20, 5, true);
 
         // Assert
         Assert.Same(expectedResponse, result);
-        _mockApiClient.Verify(x => x.SearchDocumentsAsync("query", "col1", null, 20, 5), Times.Once);
+        _mockApiClient.Verify(x => x.SearchDocumentsAsync("query", "col1", null, 20, 5, true), Times.Once);
     }
 
     [Fact]

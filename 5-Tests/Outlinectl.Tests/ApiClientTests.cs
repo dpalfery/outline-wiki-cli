@@ -124,4 +124,19 @@ public class ApiClientTests
         Assert.Contains("Forbidden", ex.Message);
         Assert.Contains("token scope insufficient", ex.Message);
     }
+
+    [Fact]
+    public async Task EnsureBaseUrlAsync_ShouldThrowWhenProfileMissing()
+    {
+        // Arrange
+        _authMock.Reset();
+        _authMock.Setup(x => x.GetCurrentProfileNameAsync()).ReturnsAsync("default");
+        _authMock.Setup(x => x.GetProfileAsync("default")).ReturnsAsync((Core.Domain.Profile?)null);
+
+        var httpClient = new HttpClient(_handlerMock.Object);
+        var client = new OutlineApiClient(httpClient, _authMock.Object);
+
+        // Act / Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => client.ListCollectionsAsync());
+    }
 }
