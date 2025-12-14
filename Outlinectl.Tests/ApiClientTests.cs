@@ -96,4 +96,32 @@ public class ApiClientTests
         // Assert
         Assert.Equal("d1", result.Id);
     }
+
+    [Fact]
+    public async Task ListCollectionsAsync_WhenForbidden_ShouldThrowWithStatusAndBody()
+    {
+        // Arrange
+        const string errorBody = "{\"message\":\"Forbidden: token scope insufficient\"}";
+
+        _handlerMock.Protected()
+            .Setup<Task<HttpResponseMessage>>(
+                "SendAsync",
+                ItExpr.Is<HttpRequestMessage>(r => r.Method == HttpMethod.Post && r.RequestUri!.ToString().EndsWith("api/collections.list")),
+                ItExpr.IsAny<CancellationToken>()
+            )
+            .ReturnsAsync(new HttpResponseMessage
+            {
+                StatusCode = HttpStatusCode.Forbidden,
+                ReasonPhrase = "Forbidden",
+                Content = new StringContent(errorBody)
+            });
+
+        // Act
+        var ex = await Assert.ThrowsAsync<HttpRequestException>(() => _client.ListCollectionsAsync());
+
+        // Assert
+        Assert.Contains("403", ex.Message);
+        Assert.Contains("Forbidden", ex.Message);
+        Assert.Contains("token scope insufficient", ex.Message);
+    }
 }

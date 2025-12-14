@@ -36,11 +36,102 @@ public class OutlineApiClient : IOutlineApiClient
         }
     }
 
+    private static async Task EnsureSuccessOrThrowAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return;
+        }
+
+        string body = string.Empty;
+        try
+        {
+            body = await response.Content.ReadAsStringAsync();
+        }
+        catch
+        {
+            // Ignore body read errors; we'll still throw a useful exception.
+        }
+
+        var request = response.RequestMessage;
+        var requestSummary = request != null
+            ? $"{request.Method} {request.RequestUri}"
+            : "<unknown request>";
+
+        var status = (int)response.StatusCode;
+        var reason = response.ReasonPhrase;
+
+        string extractedMessage = TryExtractMessageFromJson(body);
+        var bodySnippet = Truncate(extractedMessage.Length > 0 ? extractedMessage : body, 4096);
+
+        var message = $"Outline API request failed: {requestSummary} -> {status} {reason}.";
+        if (!string.IsNullOrWhiteSpace(bodySnippet))
+        {
+            message += $" Body: {bodySnippet}";
+        }
+
+        throw new HttpRequestException(message, null, response.StatusCode);
+    }
+
+    private static string Truncate(string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value) || value.Length <= maxLength)
+        {
+            return value;
+        }
+
+        return value.Substring(0, maxLength) + "…";
+    }
+
+    private static string TryExtractMessageFromJson(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return string.Empty;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            // Common Outline-ish / API patterns
+            if (root.ValueKind == JsonValueKind.Object)
+            {
+                if (root.TryGetProperty("message", out var messageProp) && messageProp.ValueKind == JsonValueKind.String)
+                {
+                    return messageProp.GetString() ?? string.Empty;
+                }
+
+                if (root.TryGetProperty("error", out var errorProp))
+                {
+                    if (errorProp.ValueKind == JsonValueKind.String)
+                    {
+                        return errorProp.GetString() ?? string.Empty;
+                    }
+
+                    if (errorProp.ValueKind == JsonValueKind.Object &&
+                        errorProp.TryGetProperty("message", out var nestedMessage) &&
+                        nestedMessage.ValueKind == JsonValueKind.String)
+                    {
+                        return nestedMessage.GetString() ?? string.Empty;
+                    }
+                }
+            }
+        }
+        catch
+        {
+            // Not JSON or unparsable; fall back to raw body.
+        }
+
+        return string.Empty;
+    }
+
     public async Task<StandardListResponse<CollectionDto>> ListCollectionsAsync(int limit = 10, int offset = 0)
     {
         await EnsureBaseUrlAsync();
         var response = await _httpClient.PostAsJsonAsync("api/collections.list", new { limit, offset });
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessOrThrowAsync(response);
         
         var result = await response.Content.ReadFromJsonAsync<StandardListResponse<CollectionDto>>();
         return result ?? new StandardListResponse<CollectionDto>();
@@ -59,7 +150,7 @@ public class OutlineApiClient : IOutlineApiClient
          };
          
          var response = await _httpClient.PostAsJsonAsync("api/documents.search", payload);
-         response.EnsureSuccessStatusCode();
+            await EnsureSuccessOrThrowAsync(response);
          
          var result = await response.Content.ReadFromJsonAsync<StandardListResponse<SearchResultDto>>();
          return result ?? new StandardListResponse<SearchResultDto>();
@@ -69,7 +160,7 @@ public class OutlineApiClient : IOutlineApiClient
     {
         await EnsureBaseUrlAsync();
         var response = await _httpClient.PostAsJsonAsync("api/documents.info", new { id });
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessOrThrowAsync(response);
         
         var result = await response.Content.ReadFromJsonAsync<StandardResponse<DocumentDto>>();
         return result?.Data ?? throw new Exception("Document not found");
@@ -79,7 +170,7 @@ public class OutlineApiClient : IOutlineApiClient
     {
         await EnsureBaseUrlAsync();
         var response = await _httpClient.PostAsJsonAsync("api/documents.create", request);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessOrThrowAsync(response);
         
         var result = await response.Content.ReadFromJsonAsync<StandardResponse<DocumentDto>>();
         return result?.Data ?? throw new Exception("Failed to create document");
@@ -89,7 +180,7 @@ public class OutlineApiClient : IOutlineApiClient
     {
         await EnsureBaseUrlAsync();
         var response = await _httpClient.PostAsJsonAsync("api/documents.update", request);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessOrThrowAsync(response);
         
         var result = await response.Content.ReadFromJsonAsync<StandardResponse<DocumentDto>>();
         return result?.Data ?? throw new Exception("Failed to update document");
@@ -101,7 +192,7 @@ public class OutlineApiClient : IOutlineApiClient
         // Uses documents.list
         var payload = new { collectionId, parentDocumentId = parentId, limit, offset };
         var response = await _httpClient.PostAsJsonAsync("api/documents.list", payload);
-        response.EnsureSuccessStatusCode();
+        await EnsureSuccessOrThrowAsync(response);
 
         var result = await response.Content.ReadFromJsonAsync<StandardListResponse<DocumentDto>>();
         return result ?? new StandardListResponse<DocumentDto>();

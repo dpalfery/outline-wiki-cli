@@ -17,12 +17,16 @@ This skill is **environment-first**. Droids should read configuration from envir
 
 - `OUTLINE_BASE_URL` (recommended): Outline instance URL (e.g. `https://docs.example.com`)
 - `OUTLINE_API_TOKEN` (recommended): Outline API token
-- `OUTLINE_COLLECTION_ID` (optional): Default collection ID for `docs create` and for filtering `docs search`
 - `profile` (optional): Defaults to `default` (used for local config/credential store)
+
+Notes:
+- The CLI currently does **not** read a default collection ID from environment variables.
+- For `docs search`, provide `--collection-id` and/or `--parent-id` explicitly when you need scoped results.
+- when parent-id is provided the user is looking for a sub-document, search all sub-documents of the parent-id for the information the user is looking for.
 
 ## Safety and Secrets
 - Never print or log API tokens.
-- Prefer passing tokens via stdin: `--token-stdin`.
+- Default login is environment-based (see below). Use `--token-stdin` when you cannot set `OUTLINE_API_TOKEN` safely (e.g., piping from a secret manager).
 - For runtime auth (API calls), `OUTLINE_API_TOKEN` overrides the stored token.
 
 ## How to Run
@@ -72,24 +76,26 @@ On errors:
 
 ## Core Workflows
 
-### 1) Login (Non-Interactive)
+### 1) Authenticate First (Required)
 
-Preferred (stdin):
+Before running **any** commands, the agent MUST authenticate and confirm it succeeded.
 
-```powershell
-$env:OUTLINE_BASE_URL = "https://docs.example.com"
-$env:OUTLINE_PROFILE = "default"
-$env:OUTLINE_API_TOKEN = "<TOKEN>"
+Success criteria:
+- Exit code is `0`.
+- If `--json` is used, stdout JSON envelope has `"ok": true` for `auth.login`.
+
+Default (environment-first, non-interactive):
 
 # If --base-url and --token are omitted, outlinectl will pull from OUTLINE_BASE_URL and OUTLINE_API_TOKEN.
-dotnet run --project .\\Outlinectl.Cli -- auth login --profile $env:OUTLINE_PROFILE --json
+dotnet run --project .\\Outlinectl.Cli -- auth login --profile default --json
 ```
 
-Alternative (inline token; avoid if possible):
+Then immediately verify local auth status:
 
 ```powershell
-dotnet run --project .\\Outlinectl.Cli -- auth login --base-url "https://docs.example.com" --token "<TOKEN>" --profile default --json
+dotnet run --project .\Outlinectl.Cli -- auth status --json
 ```
+If the agent fails to authenticate, it MUST exit and inform the user that it failed to authenticate.
 
 ### 2) Verify Auth Status
 
@@ -106,17 +112,13 @@ dotnet run --project .\Outlinectl.Cli -- collections list --limit 50 --offset 0 
 ### 4) Search Documents
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- docs search --query "onboarding" --limit 10 --offset 0 --json
+# Scope search to a collection (and optionally a parent document subtree).
+dotnet run --project .\Outlinectl.Cli -- docs search --query "policy" --collection-id "<COLLECTION_ID>" --parent-id "<PARENT_DOC_ID>" --limit 10 --offset 0 --json
 ```
 
-Optional filter:
-
-```powershell
-$env:OUTLINE_COLLECTION_ID = "<COLLECTION_ID>"
-
-# If --collection-id is omitted, outlinectl will pull from OUTLINE_COLLECTION_ID.
-dotnet run --project .\\Outlinectl.Cli -- docs search --query "policy" --json
-```
+Notes:
+- `--query` is required by the CLI.
+- For automation, treat `--collection-id` and `--parent-id` as required inputs if you don't have these values ask the user for them.
 
 ### 5) Get Document
 

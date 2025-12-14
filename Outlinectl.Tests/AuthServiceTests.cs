@@ -51,6 +51,7 @@ public class AuthServiceTests
     public async Task GetTokenAsync_ShouldReturnTokenFromSecureStore()
     {
         // Arrange
+        Environment.SetEnvironmentVariable("OUTLINE_API_TOKEN", null);
         _mockSecureStore.Setup(s => s.GetTokenAsync("default")).ReturnsAsync("secret-token");
 
         // Act

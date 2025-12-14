@@ -52,13 +52,9 @@ public class AuthService : IAuthService
         // Logic should be here.
         
         var envToken = Environment.GetEnvironmentVariable("OUTLINE_API_TOKEN");
-        if (!string.IsNullOrEmpty(envToken))
+        if (!string.IsNullOrWhiteSpace(envToken))
         {
-            // If using env token, which profile? 
-            // Env token usually overrides the "current" profile's token.
-            // But if specific profile requested, maybe not.
-            // Assuming env var is global override.
-            return envToken;
+            return envToken.Trim();
         }
 
         return await _secureStore.GetTokenAsync(profileName);
