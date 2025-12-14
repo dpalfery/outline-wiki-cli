@@ -34,7 +34,7 @@ Notes:
 From the repo (recommended for droids working in this workspace):
 
 ```powershell
-cd Outlinectl.Cli
+cd 1-Presentation\Outlinectl.Cli
 dotnet run -- --help
 ```
 
@@ -87,33 +87,33 @@ Success criteria:
 Default (environment-first, non-interactive):
 
 # If --base-url and --token are omitted, outlinectl will pull from OUTLINE_BASE_URL and OUTLINE_API_TOKEN.
-dotnet run --project .\\Outlinectl.Cli -- auth login --profile default --json
+dotnet run --project .\\1-Presentation\\Outlinectl.Cli -- auth login --profile default --json
 ```
 
 Then immediately verify local auth status:
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- auth status --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- auth status --json
 ```
 If the agent fails to authenticate, it MUST exit and inform the user that it failed to authenticate.
 
 ### 2) Verify Auth Status
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- auth status --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- auth status --json
 ```
 
 ### 3) List Collections
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- collections list --limit 50 --offset 0 --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- collections list --limit 50 --offset 0 --json
 ```
 
 ### 4) Search Documents
 
 ```powershell
 # Scope search to a collection (and optionally a parent document subtree).
-dotnet run --project .\Outlinectl.Cli -- docs search --query "policy" --collection-id "<COLLECTION_ID>" --parent-id "<PARENT_DOC_ID>" --limit 10 --offset 0 --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- docs search --query "policy" --collection-id "<COLLECTION_ID>" --parent-id "<PARENT_DOC_ID>" --limit 10 --offset 0 --json
 ```
 
 Notes:
@@ -125,13 +125,13 @@ Notes:
 Automation / structured:
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- docs get --id "<DOC_ID>" --format json --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- docs get --id "<DOC_ID>" --format json --json
 ```
 
 Human-readable markdown (stdout is raw markdown text; do NOT use `--json`):
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- docs get --id "<DOC_ID>" --format markdown
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- docs get --id "<DOC_ID>" --format markdown
 ```
 
 ### 6) Create Document
@@ -143,19 +143,19 @@ From stdin (preferred for large content):
 # Title
 
 Body goes here.
-"@ | dotnet run --project .\\Outlinectl.Cli -- docs create --title "My Doc" --stdin --json
+"@ | dotnet run --project .\\1-Presentation\\Outlinectl.Cli -- docs create --title "My Doc" --stdin --json
 ```
 
 From file:
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- docs create --title "My Doc" --collection-id "<COLLECTION_ID>" --file ".\doc.md" --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- docs create --title "My Doc" --collection-id "<COLLECTION_ID>" --file ".\doc.md" --json
 ```
 
 ### 7) Update Document
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- docs update --id "<DOC_ID>" --title "New Title" --file ".\updated.md" --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- docs update --id "<DOC_ID>" --title "New Title" --file ".\updated.md" --json
 ```
 
 ### 8) Export Document
@@ -163,7 +163,7 @@ dotnet run --project .\Outlinectl.Cli -- docs update --id "<DOC_ID>" --title "Ne
 Exports markdown files to a directory (optionally including descendants):
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- docs export "<DOC_ID>" --output-dir ".\export" --subtree --json
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- docs export "<DOC_ID>" --output-dir ".\export" --subtree --json
 ```
 
 ## Interactive Shell (Optional)
@@ -171,7 +171,7 @@ dotnet run --project .\Outlinectl.Cli -- docs export "<DOC_ID>" --output-dir ".\
 Use the shell only for manual exploration; avoid it for automation:
 
 ```powershell
-dotnet run --project .\Outlinectl.Cli -- shell
+dotnet run --project .\1-Presentation\Outlinectl.Cli -- shell
 ```
 
 Inside the shell, run commands as you would normally:
