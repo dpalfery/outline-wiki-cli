@@ -208,6 +208,20 @@ class Program
                 });
             })
             .UseDefaults()
+            .AddMiddleware(async (context, next) =>
+            {
+                var host = context.GetHost();
+                var formatter = host.Services.GetRequiredService<IOutputFormatter>();
+
+                var parseResult = context.ParseResult;
+                var isJson = parseResult.GetValueForOption(jsonOption);
+                var isQuiet = parseResult.GetValueForOption(quietOption);
+
+                formatter.SetFormat(isJson ? OutputFormat.Json : OutputFormat.Text);
+                formatter.SetQuiet(isQuiet);
+
+                await next(context);
+            })
             .UseExceptionHandler((ex, context) =>
             {
                 var host = context.GetHost();
