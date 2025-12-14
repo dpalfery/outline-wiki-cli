@@ -6,6 +6,7 @@ namespace Outlinectl.Cli.Services;
 public class OutputFormatter : IOutputFormatter
 {
     private OutputFormat _format = OutputFormat.Text;
+    private bool _quiet;
     private readonly JsonSerializerOptions _jsonOptions;
 
     public OutputFormatter()
@@ -23,10 +24,20 @@ public class OutputFormatter : IOutputFormatter
         _format = format;
     }
 
+    public void SetQuiet(bool quiet)
+    {
+        _quiet = quiet;
+    }
+
     public bool IsJson => _format == OutputFormat.Json;
 
     public void WriteOutput<T>(T data, string commandName, MetaData? meta = null)
     {
+        if (_quiet)
+        {
+            return;
+        }
+
         if (_format == OutputFormat.Json)
         {
             var envelope = new JsonEnvelope<T>

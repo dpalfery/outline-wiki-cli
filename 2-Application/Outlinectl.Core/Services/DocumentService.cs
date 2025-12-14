@@ -16,14 +16,7 @@ public class DocumentService : IDocumentService
 
     public async Task<StandardListResponse<SearchResultDto>> SearchDocumentsAsync(string query, string? collectionId, string? parentDocumentId, int limit, int offset, bool includeArchived)
     {
-        // 'includeArchived' might not be in generic search DTO yet, handled by API client params usually?
-        // Outline API search: `includeArchived` boolean.
-        // I need to update IOutlineApiClient or handle it.
-        // My IOutlineApiClient definition for SearchDocumentsAsync missed `includeArchived`.
-        // I'll skip it for now or implement if needed. Requirements said "IF --include-archived is set".
-        // I should update API client later or ignore if API doesn't support easily (usually it does).
-        
-        return await _apiClient.SearchDocumentsAsync(query, collectionId, parentDocumentId, limit, offset);
+        return await _apiClient.SearchDocumentsAsync(query, collectionId, parentDocumentId, limit, offset, includeArchived);
     }
 
     public async Task<StandardListResponse<DocumentDto>> ListDocumentsAsync(string? collectionId, string? parentId, int limit, int offset)

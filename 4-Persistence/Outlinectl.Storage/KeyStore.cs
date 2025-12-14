@@ -37,6 +37,7 @@ public class KeyStore : ISecureStore
     {
         var json = JsonSerializer.Serialize(secrets); // Minified for secrets
         await File.WriteAllTextAsync(_secretsPath, json);
+        HardenSecretsFile();
     }
 
     public async Task<string?> GetTokenAsync(string profileName)
@@ -61,6 +62,20 @@ public class KeyStore : ISecureStore
         if (secrets.Remove(profileName))
         {
             await SaveSecretsAsync(secrets);
+        }
+    }
+
+    private void HardenSecretsFile()
+    {
+        if (OperatingSystem.IsWindows()) return;
+
+        try
+        {
+            File.SetUnixFileMode(_secretsPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        }
+        catch
+        {
+            // Best-effort hardening; ignore if not supported.
         }
     }
 }
