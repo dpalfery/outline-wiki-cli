@@ -44,7 +44,7 @@ jobs:
 
       - name: Publish
         run: >-
-          dotnet publish Outlinectl.Cli/Outlinectl.Cli.csproj
+          dotnet publish 1-Presentation/Outlinectl.Cli/Outlinectl.Cli.csproj
           -c Release
           -r ${{ matrix.rid }}
           --self-contained true
