@@ -4,7 +4,6 @@
 // Since I cannot implement cross-platform keychain interactively easily without libs, I will usage a user-local file.
 // Or actually, simple environment variable checking + local file fallback.
 
-using System.IO;
 using System.Text.Json;
 using Outlinectl.Core.Services;
 
