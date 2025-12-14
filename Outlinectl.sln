@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outlinectl.Core", "0-Base\Outlinectl.Core\Outlinectl.Core.csproj", "{9C089EC9-C227-4333-9048-CB22EFD964AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outlinectl.Core", "2-Application\Outlinectl.Core\Outlinectl.Core.csproj", "{9C089EC9-C227-4333-9048-CB22EFD964AA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Outlinectl.Api", "4-Persistence\Outlinectl.Api\Outlinectl.Api.csproj", "{E94EFD93-EF3F-4806-888E-2A7A7E870F14}"
 EndProject

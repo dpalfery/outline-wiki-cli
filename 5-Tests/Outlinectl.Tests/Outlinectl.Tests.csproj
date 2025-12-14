@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\0-Base\Outlinectl.Core\Outlinectl.Core.csproj" />
+    <ProjectReference Include="..\..\2-Application\Outlinectl.Core\Outlinectl.Core.csproj" />
     <ProjectReference Include="..\..\4-Persistence\Outlinectl.Api\Outlinectl.Api.csproj" />
     <ProjectReference Include="..\..\4-Persistence\Outlinectl.Storage\Outlinectl.Storage.csproj" />
     <ProjectReference Include="..\..\1-Presentation\Outlinectl.Cli\Outlinectl.Cli.csproj" />

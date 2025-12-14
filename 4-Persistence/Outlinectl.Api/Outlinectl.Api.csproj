@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <ProjectReference Include="..\..\0-Base\Outlinectl.Core\Outlinectl.Core.csproj" />
+    <ProjectReference Include="..\..\2-Application\Outlinectl.Core\Outlinectl.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
