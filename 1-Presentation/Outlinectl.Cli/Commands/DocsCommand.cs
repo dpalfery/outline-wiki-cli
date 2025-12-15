@@ -25,7 +25,7 @@ public class DocsCommand : Command
     {
         var command = new Command("search", "Search for documents.");
         var queryOption = new Option<string>("--query", "Search query terms.") { IsRequired = true };
-        var collectionOption = new Option<string>("--collection-id", "Filter by collection ID.");
+        var collectionOption = new Option<string>("--collection-id", "Filter by collection ID. Defaults to OUTLINE_COLLECTION_ID env var if set.");
         var parentOption = new Option<string>("--parent-id", "Filter by parent document ID.");
         var limitOption = new Option<int>("--limit", () => 10, "Max results.");
         var offsetOption = new Option<int>("--offset", () => 0, "Pagination offset.");
@@ -45,7 +45,8 @@ public class DocsCommand : Command
             var formatter = host.Services.GetRequiredService<IOutputFormatter>();
 
             var query = context.ParseResult.GetValueForOption(queryOption)!;
-            var collectionId = context.ParseResult.GetValueForOption(collectionOption);
+            var collectionId = context.ParseResult.GetValueForOption(collectionOption) 
+                ?? Environment.GetEnvironmentVariable("OUTLINE_COLLECTION_ID");
             var parentId = context.ParseResult.GetValueForOption(parentOption);
             var limit = context.ParseResult.GetValueForOption(limitOption);
             var offset = context.ParseResult.GetValueForOption(offsetOption);
@@ -76,7 +77,7 @@ public class DocsCommand : Command
     private Command CreateListCommand()
     {
         var command = new Command("list", "List documents.");
-        var collectionOption = new Option<string>("--collection-id", "Filter by collection ID.");
+        var collectionOption = new Option<string>("--collection-id", "Filter by collection ID. Defaults to OUTLINE_COLLECTION_ID env var if set.");
         var parentOption = new Option<string>("--parent-id", "Filter by parent document ID.");
         var limitOption = new Option<int>("--limit", () => 25, "Max results.");
         var offsetOption = new Option<int>("--offset", () => 0, "Pagination offset.");
@@ -92,7 +93,8 @@ public class DocsCommand : Command
             var docService = host.Services.GetRequiredService<IDocumentService>();
             var formatter = host.Services.GetRequiredService<IOutputFormatter>();
 
-            var collectionId = context.ParseResult.GetValueForOption(collectionOption);
+            var collectionId = context.ParseResult.GetValueForOption(collectionOption)
+                ?? Environment.GetEnvironmentVariable("OUTLINE_COLLECTION_ID");
             var parentId = context.ParseResult.GetValueForOption(parentOption);
             var limit = context.ParseResult.GetValueForOption(limitOption);
             var offset = context.ParseResult.GetValueForOption(offsetOption);
@@ -166,7 +168,7 @@ public class DocsCommand : Command
     {
         var command = new Command("create", "Create a new document.");
         var titleOption = new Option<string>("--title", "Document title.") { IsRequired = true };
-        var collectionOption = new Option<string>("--collection-id", "Collection ID.") { IsRequired = true };
+        var collectionOption = new Option<string>("--collection-id", "Collection ID. Defaults to OUTLINE_COLLECTION_ID env var if set.");
         var textOption = new Option<string>("--text", "Document Markdown content.");
         var fileOption = new Option<string>("--file", "Path to Markdown file.");
         var stdinOption = new Option<bool>("--stdin", "Read content from stdin.");
@@ -188,7 +190,16 @@ public class DocsCommand : Command
             var formatter = host.Services.GetRequiredService<IOutputFormatter>();
 
             var title = context.ParseResult.GetValueForOption(titleOption)!;
-            var collectionId = context.ParseResult.GetValueForOption(collectionOption)!;
+            var collectionId = context.ParseResult.GetValueForOption(collectionOption) 
+                ?? Environment.GetEnvironmentVariable("OUTLINE_COLLECTION_ID");
+            
+            if (string.IsNullOrEmpty(collectionId))
+            {
+                formatter.WriteError(new Core.Common.ApiError { Message = "Collection ID is required. Provide via --collection-id or OUTLINE_COLLECTION_ID env var." }, "docs.create", 1);
+                context.ExitCode = 1;
+                return;
+            }
+
             var text = context.ParseResult.GetValueForOption(textOption);
             var file = context.ParseResult.GetValueForOption(fileOption);
             var useStdin = context.ParseResult.GetValueForOption(stdinOption);

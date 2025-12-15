@@ -124,6 +124,9 @@ Configuration is stored in your application data folder:
 	- Useful for CI/CD: set the env var and run commands without writing secrets to disk.
 - `OUTLINE_BASE_URL`: Outline instance base URL (e.g. `https://docs.example.com`).
 	- Currently used as a fallback for `outlinectl auth login` when `--base-url` is omitted.
+- `OUTLINE_COLLECTION_ID`: Default Collection ID.
+	- Used as a fallback when `--collection-id` is omitted in `docs search`, `docs list`, or `docs create` commands.
+	- Useful for working within a specific collection context without repeating the flag.
 
 ### Auth options
 
